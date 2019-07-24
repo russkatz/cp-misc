@@ -19,14 +19,14 @@ nohup ./node1/bin/zookeeper-server-start ./node1/etc/kafka/zookeeper.properties 
 #nohup ./node3/bin/zookeeper-server-start ./node3/etc/kafka/zookeeper.properties &
 echo ""
 
-sleep 30
+sleep 5
 
 echo Starting Kafka brokers
 nohup ./node1/bin/kafka-server-start ./node1/etc/kafka/server.properties &
 nohup ./node2/bin/kafka-server-start ./node2/etc/kafka/server.properties &
 nohup ./node3/bin/kafka-server-start ./node3/etc/kafka/server.properties &
 echo ""
-sleep 20
+sleep 10
 
 echo Starting Schema Registry
 ./node1/bin/schema-registry-start -daemon ./node1/etc/schema-registry/schema-registry.properties
