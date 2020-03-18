@@ -316,3 +316,6 @@ topic.rename.format=${topic}-replica
 
 # Session timeout in milliseconds for the destination Zookeeper cluster.
 #dest.zookeeper.connection.timeout.ms=6000
+
+
+provenance.header.enable=true
