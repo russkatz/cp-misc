@@ -5,7 +5,9 @@ import time
 
 #alert after this many seconds of no messages on topic
 alertseconds = 5
+#topic to monitor
 monitortopic = 'irc'
+#topic to send alert events to
 alerttopic = 'alerts'
 
 consumer_settings = {
@@ -25,27 +27,44 @@ producer_settings = {
 c = Consumer(consumer_settings)
 p = Producer(producer_settings)
 
+#Check current time in epoch seconds
 lastmsg = int(time.time())
 
+#Connect to topic to monitor
 c.subscribe([monitortopic])
+
+#This var just tracks if an alert was sent yet to prevent spamming the alerttopic
 alerted = 0
 
 try:
     while True:
         msg = c.poll(0.1)
         if msg is None:
+            #Get the seconds elapsed since the last message (or since the application started if this is the first iteration through)
             lastmsgdelay = int(time.time()) - lastmsg
+            #debug printing for me :)
             print(lastmsgdelay)
+            #If the last message was longer than the alertseconds threshhold fire out an alert if no alert has been sent out yet
             if lastmsgdelay > alertseconds:
                if alerted == 0 :
                  msg = 'No msgs from %s for %s seconds' %(monitortopic,lastmsgdelay)
+                 #More debug printing for me :)
                  print(msg)
                  p.produce(alerttopic, key='', value=msg )
+                 #Set that an alert was sent for this violation
                  alerted = 1
             continue
         else:
+            #This gets hit if there is a message received. Resets the lastmsg time to the current time
             lastmsg = int(time.time())
-            alerted = 0
+            #Send a second alert if this message clears a violation
+            if alerted == 1:
+                msg = 'Msgs received from %s after %s seconds' %(monitortopic,lastmsgdelay)
+                #More debug printing for me :)
+                print(msg)
+                p.produce(alerttopic, key='', value=msg )
+                #Clear the violation
+                alerted = 0
             continue
 
 except KeyboardInterrupt:
